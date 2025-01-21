@@ -19,3 +19,26 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.box-grey {
+  background-color: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  font-weight: bold;
+}
+
+.box-white {
+  border: 1px solid #f8f8f8;
+  cursor: pointer;
+  font-weight: bold;
+}
+.box-white:hover {
+  background-color: #f8f8f8; /* Changes text color to white on hover */
+}
+.box-white-2 {
+  border: 1px solid #e0e0e0;
+}
+
+/* White Background with Gray Border */
+/* .box-white {
+  @apply bg-white border border-gray-300 rounded-lg p-4;
+} */

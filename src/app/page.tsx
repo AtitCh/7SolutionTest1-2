@@ -1,101 +1,199 @@
-import Image from "next/image";
+"use client";
+import { IItem } from "./type/item";
+import ButtonList from "./component/buttonlist";
+import { useState } from "react";
+import fetchData from "./utils/axios";
+import groupByDepartment from "./utils/groupByDepartment";
 
+//
+const basket = [
+  {
+    type: "Fruit",
+    name: "Apple",
+  },
+  {
+    type: "Vegetable",
+    name: "Broccoli",
+  },
+  {
+    type: "Vegetable",
+    name: "Mushroom",
+  },
+  {
+    type: "Fruit",
+    name: "Banana",
+  },
+  {
+    type: "Vegetable",
+    name: "Tomato",
+  },
+  {
+    type: "Fruit",
+    name: "Orange",
+  },
+  {
+    type: "Fruit",
+    name: "Mango",
+  },
+  {
+    type: "Fruit",
+    name: "Pineapple",
+  },
+  {
+    type: "Vegetable",
+    name: "Cucumber",
+  },
+  {
+    type: "Fruit",
+    name: "Watermelon",
+  },
+  {
+    type: "Vegetable",
+    name: "Carrot",
+  },
+];
+//
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  //for test 1
+  const [vegetable, setVegetable] = useState<IItem[]>([]);
+  const [fruit, setFruit] = useState<IItem[]>([]);
+  const [item, setItem] = useState<IItem[]>(basket);
+  //
+  const handlePushItem = (item: IItem) => {
+    handleBasket(item);
+    if (item.type === "Vegetable") {
+      setVegetable((prev) => [...prev, item]);
+    } else if (item.type === "Fruit") {
+      setFruit((prev) => [...prev, item]);
+    }
+  };
+  //
+  const handleBasket = (item: IItem) => {
+    setItem((prev) => prev.filter((i) => i.name !== item.name));
+  };
+  //
+  const handleRemoveFruit = (v: IItem) => {
+    setFruit((prev) => prev.filter((i) => i.name !== v.name));
+    setItem((prev) => [...prev, v]);
+  };
+  //
+  const handleRemoveVegetable = (v: IItem) => {
+    setVegetable((prev) => prev.filter((i) => i.name !== v.name));
+    setItem((prev) => [...prev, v]);
+  };
+  //
+  const handleRemoveFirstFruit = () => {
+    if (fruit.length === 0) {
+      return;
+    } else {
+      let firstItem = fruit[0];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      setFruit((prev) => prev.slice(1));
+
+      setItem((prev) => [...prev, firstItem]);
+    }
+  };
+  //
+  const handleRemoveFirstVeg = () => {
+    if (vegetable.length === 0) {
+      return;
+    } else {
+      let firstItem = vegetable[0];
+
+      setVegetable((prev) => prev.slice(1));
+
+      setItem((prev) => [...prev, firstItem]);
+    }
+  };
+  //
+  // for test 2
+  const [grouped, setGrouped] = useState<any>({});
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
+
+  const handleRowClick = (department: string) => {
+    setExpandedRow(expandedRow === department ? null : department); // Toggle row
+  };
+  const processUserData = async () => {
+    const users = await fetchData();
+    const groupedData = groupByDepartment(users);
+    console.log(groupedData);
+    setGrouped(groupedData);
+  };
+  return (
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+        <div className="bg-white h-[85vh] w-[50vw] grid grid-cols-3 gap-4 bg-gray-100 p-4">
+          <ButtonList items={item} handleItem={handlePushItem} />
+          <div
+            className="grid grid-rows-[7%_93%]"
+            onClick={handleRemoveFirstFruit}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+            <div className="box-grey text-black flex items-center justify-center w-full">
+              Fruit
+            </div>
+            <div className="box-white-2 text-white flex items-center justify-center w-full">
+              <ButtonList items={fruit} handleItem={handleRemoveFruit} />
+            </div>
+          </div>
+          <div
+            className="grid grid-rows-[7%_93%]"
+            onClick={handleRemoveFirstVeg}
+          >
+            <div className="box-grey text-black flex items-center justify-center w-full">
+              Vegetable
+            </div>
+            <div className="box-white-2 w-auto text-white flex items-center justify-center w-full">
+              <ButtonList
+                items={vegetable}
+                handleItem={handleRemoveVegetable}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="bg-white h-[85vh] w-[50vw] grid grid-cols-[20%_80%] gap-0 bg-gray-100 p-4">
+          <div className=" h-[20vh] w-[10vw] flex items-center justify-center">
+            <button
+              className="box-white text-black hover flex items-center justify-center px-6 py-3 rounded-sm shadow-sm"
+              onClick={processUserData}
+            >
+              Get API
+            </button>
+          </div>
+
+          <div className="h-full w-full overflow-auto">
+            <table className="table-auto text-black w-full">
+              <thead className="border-2">
+                <tr>
+                  <th className="border-2 text-center">Department</th>
+                  <th className="border-2 text-center">Age-Range</th>
+                  <th className="border-2 text-center">Female</th>
+                  <th className="border-2 text-center">Male</th>
+                </tr>
+              </thead>
+              <tbody className="border-2">
+                {Object.entries(grouped).map(
+                  ([department, data]: [string, any], i: number) => (
+                    <tr key={i} onClick={() => handleRowClick(department)}>
+                      <td className="border-2 text-center">{department}</td>
+                      <td className="border-2 text-center">{data.ageRange}</td>
+                      <td className="border-2 text-center">{data.female}</td>
+                      <td className="border-2 text-center">{data.male}</td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+            <div className="text-black mt-2">JSON area</div>
+            <textarea
+              value={JSON.stringify(grouped, null, 2)} // Converts JSON to a formatted string
+              // onChange={(e) => setJsonData(JSON.parse(e.target.value))} // Optionally update the state with new JSON (if editable)
+              className="w-full h-48 p-2 border border-gray-300 text-black mt-2"
+              readOnly // If you want the JSON to be read-only in the text box
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          </div>
+          <div></div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
