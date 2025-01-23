@@ -6,7 +6,7 @@ import fetchData from "./utils/axios";
 import groupByDepartment from "./utils/groupByDepartment";
 
 //
-const basket = [
+const fruitBasket = [
   {
     type: "Fruit",
     name: "Apple",
@@ -53,59 +53,98 @@ const basket = [
   },
 ];
 //
+
+//
 export default function Home() {
   //for test 1
   const [vegetable, setVegetable] = useState<IItem[]>([]);
+
   const [fruit, setFruit] = useState<IItem[]>([]);
-  const [item, setItem] = useState<IItem[]>(basket);
+
+  const [basket, setBasket] = useState<IItem[]>(fruitBasket);
+
   //
-  const handlePushItem = (item: IItem) => {
-    handleBasket(item);
-    if (item.type === "Vegetable") {
-      setVegetable((prev) => [...prev, item]);
-    } else if (item.type === "Fruit") {
-      setFruit((prev) => [...prev, item]);
+  const handlePushItem = async (v: IItem) => {
+    handleBasket(v);
+
+    if (v.type === "Vegetable") {
+      setVegetable((prev) => [...prev, v]);
+
+      handleAutoRemoveVeg(v);
+    } else if (v.type === "Fruit") {
+      setFruit((prev) => [...prev, v]);
+      handleAutoRemoveFruit(v);
     }
   };
-  //
-  const handleBasket = (item: IItem) => {
-    setItem((prev) => prev.filter((i) => i.name !== item.name));
+  const handleAutoRemoveVeg = (v: IItem) => {
+    setTimeout(() => {
+      setVegetable((prev) => prev.filter((i) => i.name !== v.name));
+      setBasket((prev) => {
+        const isDuplicate = prev.some((i) => i.name === v.name);
+
+        if (isDuplicate) {
+          return prev;
+        } else {
+          return [...prev, v];
+        }
+      });
+    }, 5000);
+  };
+  const handleAutoRemoveFruit = (v: IItem) => {
+    setTimeout(() => {
+      setFruit((prev) => prev.filter((i) => i.name !== v.name));
+      setBasket((prev) => {
+        const isDuplicate = prev.some((i) => i.name === v.name);
+
+        if (isDuplicate) {
+          return prev;
+        } else {
+          return [...prev, v];
+        }
+      });
+    }, 5000);
+  };
+
+  const handleBasket = (v: IItem) => {
+    setBasket((prev) => prev.filter((i) => i.name !== v.name));
   };
   //
   const handleRemoveFruit = (v: IItem) => {
     setFruit((prev) => prev.filter((i) => i.name !== v.name));
-    setItem((prev) => [...prev, v]);
+    setBasket((prev) => [...prev, v]);
   };
   //
   const handleRemoveVegetable = (v: IItem) => {
     setVegetable((prev) => prev.filter((i) => i.name !== v.name));
-    setItem((prev) => [...prev, v]);
+    setBasket((prev) => [...prev, v]);
   };
+
+  // comment ไว้ก่อน เผื่อใช้
+  // const handleRemoveFirstFruit = () => {
+  //   if (fruit.length === 0) {
+  //     return;
+  //   } else {
+  //     let firstItem = fruit[0];
+
+  //     setFruit((prev) => prev.slice(1));
+
+  //     setBasket((prev) => [...prev, firstItem]);
+  //   }
+  // };
+  // comment ไว้ก่อน เผื่อใช้
+  // const handleRemoveFirstVeg = () => {
+  //   if (vegetable.length === 0) {
+  //     return;
+  //   } else {
+  //     let firstItem = vegetable[0];
+
+  //     setVegetable((prev) => prev.slice(1));
+
+  //     setBasket((prev) => [...prev, firstItem]);
+  //   }
+  // };
   //
-  const handleRemoveFirstFruit = () => {
-    if (fruit.length === 0) {
-      return;
-    } else {
-      let firstItem = fruit[0];
 
-      setFruit((prev) => prev.slice(1));
-
-      setItem((prev) => [...prev, firstItem]);
-    }
-  };
-  //
-  const handleRemoveFirstVeg = () => {
-    if (vegetable.length === 0) {
-      return;
-    } else {
-      let firstItem = vegetable[0];
-
-      setVegetable((prev) => prev.slice(1));
-
-      setItem((prev) => [...prev, firstItem]);
-    }
-  };
-  //
   // for test 2
   const [grouped, setGrouped] = useState<any>({});
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
@@ -116,17 +155,17 @@ export default function Home() {
   const processUserData = async () => {
     const users = await fetchData();
     const groupedData = groupByDepartment(users);
-    console.log(groupedData);
+
     setGrouped(groupedData);
   };
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <div className="bg-white h-[85vh] w-[50vw] grid grid-cols-3 gap-4 bg-gray-100 p-4">
-          <ButtonList items={item} handleItem={handlePushItem} />
+          <ButtonList items={basket} handleItem={handlePushItem} />
           <div
             className="grid grid-rows-[7%_93%]"
-            onClick={handleRemoveFirstFruit}
+            // onClick={handleRemoveFirstFruit}
           >
             <div className="box-grey text-black flex items-center justify-center w-full">
               Fruit
@@ -137,7 +176,7 @@ export default function Home() {
           </div>
           <div
             className="grid grid-rows-[7%_93%]"
-            onClick={handleRemoveFirstVeg}
+            // onClick={handleRemoveFirstVeg}
           >
             <div className="box-grey text-black flex items-center justify-center w-full">
               Vegetable
